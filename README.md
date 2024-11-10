@@ -1,2 +1,2 @@
-# crycal
-Cryptocurrency Calculator クリカリ
+# CryCal クリカリ
+Cryptocurrency Calculator 
