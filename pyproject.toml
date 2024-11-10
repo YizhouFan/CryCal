@@ -1,0 +1,9 @@
+[project]
+name = "crycal"
+version = "0.1.0"
+description = "cryptocurrency calculator"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ruff>=0.7.3",
+]
