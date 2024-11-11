@@ -13,6 +13,7 @@ class Transaction(TypedDict):
     currency: str
     amount: float
     fee_fpy: float
+    post_txn_wallet_status: dict
 
 
 class Product(TypedDict):

@@ -54,6 +54,8 @@ def convert_trade_history(trade_history: list, default_fee_rate: float = 0.001):
             "fee_jpy": fee_jpy,
         }
         result.append(transaction)
+    # sort the transaction from oldest to latest
+    result = sorted(result, key=lambda d: d["ts"])
     return result
 
 
@@ -69,9 +71,9 @@ def load_trade_history(csv_path):
     return convert_trade_history(data)
 
 
-def make_annual_report(year, annual_trade_data, annual_reports):
+def make_annual_report(year: int, annual_trade_data: list[Transaction], annual_reports: dict[int, dict[str, Product]]):
     unique_products = set([t["product"] for t in annual_trade_data])
-    product_annual_reports = []
+    product_annual_reports = {}
     for product in unique_products:
         if "/" not in product:
             # only look at crypto/JPY pairs
@@ -91,12 +93,53 @@ def make_annual_report(year, annual_trade_data, annual_reports):
             "annual_average_price_jpy": product_total_buy_price_jpy / product_total_buy_amount,
             "eoy_remaining_amount": product_total_buy_amount - product_total_sell_amount,
         }
-        product_annual_reports.append(product_annual_report)
+        product_annual_reports[product] = product_annual_report
     annual_reports[year] = product_annual_reports
 
 
-def calculate_sell_profit(sell_transaction: Transaction, trade_data: list[Transaction]):
-    pass
+def current_year_enough_amount(transaction: Transaction, annual_trade_data: list[Transaction]):
+    return True
+
+
+def calculate_sell_profit(
+    sell_transaction: Transaction, trade_data: list[Transaction], annual_reports: dict[int, dict[str, Product]]
+):
+    if current_year_enough_amount(sell_transaction, [t for t in trade_data if t["year"] == sell_transaction["year"]]):
+        profit = (
+            sell_transaction["total_price_jpy"]
+            - sell_transaction["amount"]
+            * annual_reports[sell_transaction["year"]][sell_transaction["product"]]["annual_average_price_jpy"]
+        )
+    else:
+        profit = -1
+    return profit
+
+
+def calculate_amount_distribution(
+    trade_data: list[Transaction], wallet_status: dict[str, dict[int, float]], min_year: int, max_year: int
+):
+    # assume transactions are ordered from oldest to latest
+    for i in range(len(trade_data)):
+        t = trade_data[i]
+        if t["type"] == "Buy":
+            wallet_status[t["product"]][t["year"]] += t["amount"]
+        elif t["type"] == "Sell":
+            year = t["year"]
+            remainder = t["amount"]
+            while year >= min_year:
+                # check amount of crypto of current year,
+                if wallet_status[t["product"]][year] >= remainder:
+                    wallet_status[t["product"]][year] -= remainder
+                    break
+                else:
+                    # if not enough for selling, always use up all amount of current year,
+                    # then check one year back, and so on and so forth
+                    # this is my interpretation of the laws in Japan
+                    wallet_status[t["product"]][year] = 0.0
+                    remainder = remainder - wallet_status[t["product"]][t["year"]]
+                year -= 1
+            assert remainder > 0, f"Error: Not enough {t["product"]} to sell for {t["id"]}"
+        t["post_txn_wallet_status"] = wallet_status
 
 
 def main(args):
@@ -105,19 +148,26 @@ def main(args):
 
     min_year = min([t["year"] for t in trade_data])
     max_year = max([t["year"] for t in trade_data])
+    all_products = set([t["product"] for t in trade_data if "/" in t["product"]])  # all crypto/JPY pairs
 
     annual_reports = {}
     for year in range(min_year, max_year + 1):
         make_annual_report(year, [t for t in trade_data if t["year"] == year], annual_reports)
     print(annual_reports)
 
+    wallet_status = {p: {y: 0.0 for y in range(min_year, max_year + 1)} for p in all_products}
+
+    calculate_amount_distribution(trade_data, wallet_status, min_year, max_year)
+    print(trade_data)
+
     sys.exit()
     sell_profit = {}
     for transaction in trade_data:
-        if transaction["type"] == "SELL":
-            profit = calculate_sell_profit(transaction, trade_data)
+        if transaction["type"] == "Sell":
+            profit = calculate_sell_profit(transaction, trade_data, annual_reports)
             sell_profit[transaction["id"]] = profit
 
+    print(sell_profit)
     # print(trade_data[:10])
 
 
