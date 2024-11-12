@@ -14,6 +14,8 @@ class Transaction(TypedDict):
     amount: float
     fee_fpy: float
     post_txn_wallet_status: dict
+    sell_amount_distribution: dict
+    sell_profit_jpy: float
 
 
 class Product(TypedDict):
@@ -23,3 +25,4 @@ class Product(TypedDict):
     total_sell_amount: float
     annual_average_price_jpy: float
     eoy_remaining_amount: float
+    annual_sell_profit_jpy: float

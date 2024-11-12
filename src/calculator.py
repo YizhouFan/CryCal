@@ -91,45 +91,31 @@ def make_annual_report(year: int, annual_trade_data: list[Transaction], annual_r
             "total_buy_price_jpy": product_total_buy_price_jpy,
             "total_sell_amount": product_total_sell_amount,
             "annual_average_price_jpy": product_total_buy_price_jpy / product_total_buy_amount,
-            "eoy_remaining_amount": product_total_buy_amount - product_total_sell_amount,
+            "eoy_remaining_amount": product_total_buy_amount - product_total_sell_amount,  # this is broken right now
+            "annual_sell_profit_jpy": 0.0,
         }
         product_annual_reports[product] = product_annual_report
     annual_reports[year] = product_annual_reports
 
 
-def current_year_enough_amount(transaction: Transaction, annual_trade_data: list[Transaction]):
-    return True
-
-
-def calculate_sell_profit(
-    sell_transaction: Transaction, trade_data: list[Transaction], annual_reports: dict[int, dict[str, Product]]
-):
-    if current_year_enough_amount(sell_transaction, [t for t in trade_data if t["year"] == sell_transaction["year"]]):
-        profit = (
-            sell_transaction["total_price_jpy"]
-            - sell_transaction["amount"]
-            * annual_reports[sell_transaction["year"]][sell_transaction["product"]]["annual_average_price_jpy"]
-        )
-    else:
-        profit = -1
-    return profit
-
-
-def calculate_amount_distribution(
-    trade_data: list[Transaction], wallet_status: dict[str, dict[int, float]], min_year: int, max_year: int
+def simulate_trades(
+    trade_data: list[Transaction], wallet_status: dict[str, dict[int, float]],
+    annual_reports: dict[int, dict[str, Product]], min_year: int, max_year: int
 ):
     # assume transactions are ordered from oldest to latest
-    for i in range(len(trade_data)):
+    for i in tqdm(range(len(trade_data))):
         t = trade_data[i]
         if t["type"] == "Buy":
             wallet_status[t["product"]][t["year"]] += t["amount"]
         elif t["type"] == "Sell":
+            sell_amount_distribution = {y: 0.0 for y in range(min_year, max_year + 1)}
             year = t["year"]
             remainder = t["amount"]
             while year >= min_year:
                 # check amount of crypto of current year,
                 if wallet_status[t["product"]][year] >= remainder:
                     wallet_status[t["product"]][year] -= remainder
+                    sell_amount_distribution[year] = remainder
                     break
                 else:
                     # if not enough for selling, always use up all amount of current year,
@@ -137,9 +123,27 @@ def calculate_amount_distribution(
                     # this is my interpretation of the laws in Japan
                     wallet_status[t["product"]][year] = 0.0
                     remainder = remainder - wallet_status[t["product"]][t["year"]]
+                    sell_amount_distribution[year] = wallet_status[t["product"]][year]
                 year -= 1
             assert remainder > 0, f"Error: Not enough {t["product"]} to sell for {t["id"]}"
+            t["sell_amount_distribution"] = sell_amount_distribution
+            sell_profit_jpy = sum([t["total_price_jpy"] - 
+                                   sell_amount_distribution[y] * 
+                                   annual_reports[y][t["product"]]["annual_average_price_jpy"] 
+                                   for y in sell_amount_distribution if sell_amount_distribution[y] > 0])
+            t["sell_profit_jpy"] = sell_profit_jpy
+            annual_reports[t["year"]][t["product"]]["annual_sell_profit_jpy"] += sell_profit_jpy
         t["post_txn_wallet_status"] = wallet_status
+
+
+def print_annual_reports(annual_reports: dict[int, dict[str, Product]], min_year: int, max_year: int):
+    for year in range(min_year, max_year + 1):
+        print(f"{year} ANNUAL PROFIT REPORT")
+        print(f"  Total annual profit: {sum([p["annual_sell_profit_jpy"] for p in annual_reports[year].values()]):.0f} JPY")
+        print("  Details:")
+        for product_name, product in annual_reports[year].items():
+            if product["total_sell_amount"] > 0:
+                print(f"    {product_name} has a profit of {product["annual_sell_profit_jpy"]:.0f} JPY")
 
 
 def main(args):
@@ -153,23 +157,11 @@ def main(args):
     annual_reports = {}
     for year in range(min_year, max_year + 1):
         make_annual_report(year, [t for t in trade_data if t["year"] == year], annual_reports)
-    print(annual_reports)
 
     wallet_status = {p: {y: 0.0 for y in range(min_year, max_year + 1)} for p in all_products}
 
-    calculate_amount_distribution(trade_data, wallet_status, min_year, max_year)
-    print(trade_data)
-
-    sys.exit()
-    sell_profit = {}
-    for transaction in trade_data:
-        if transaction["type"] == "Sell":
-            profit = calculate_sell_profit(transaction, trade_data, annual_reports)
-            sell_profit[transaction["id"]] = profit
-
-    print(sell_profit)
-    # print(trade_data[:10])
-
+    simulate_trades(trade_data, wallet_status, annual_reports, min_year, max_year)
+    print_annual_reports(annual_reports, min_year, max_year)
 
 if __name__ == "__main__":
     main(sys.argv)
