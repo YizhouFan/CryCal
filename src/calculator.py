@@ -78,10 +78,8 @@ def make_annual_report(year: int, annual_trade_data: list[Transaction], annual_r
         if "/" not in product:
             # only look at crypto/JPY pairs
             continue
-        # print(product)
         product_trade_data_buy = [t for t in annual_trade_data if t["product"] == product and t["type"] == "Buy"]
         product_trade_data_sell = [t for t in annual_trade_data if t["product"] == product and t["type"] == "Sell"]
-        # print(product_trade_data_buy)
         product_total_buy_amount = sum([t["amount"] for t in product_trade_data_buy])
         product_total_buy_price_jpy = sum([t["total_price_jpy"] for t in product_trade_data_buy])
         product_total_sell_amount = sum([t["amount"] for t in product_trade_data_sell])
