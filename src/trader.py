@@ -65,8 +65,8 @@ class Trader:
                         # if not enough for selling, always use up all amount of current year,
                         # then check one year back, and so on and so forth
                         # this is my interpretation of the laws in Japan
+                        remainder = remainder - self.wallet_status[t["product"]][year]
                         self.wallet_status[t["product"]][year] = 0.0
-                        remainder = remainder - self.wallet_status[t["product"]][t["year"]]
                         sell_amount_distribution[year] = self.wallet_status[t["product"]][year]
                     year -= 1
                 assert remainder > 0, f"Error: Not enough {t["product"]} to sell for {t["id"]}"
