@@ -16,3 +16,9 @@ uv run python --version
 ```
 uv run src/calculator.py data/TradeHistory.csv
 ```
+
+## Contributing
+To format
+```
+./format.sh
+```

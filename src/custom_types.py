@@ -1,5 +1,5 @@
-from typing import TypedDict
 from datetime import datetime
+from typing import TypedDict
 
 
 class Transaction(TypedDict):

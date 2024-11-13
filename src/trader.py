@@ -1,7 +1,7 @@
-from utils import load_trade_history
 from tqdm import tqdm
 
 from custom_types import Product
+from utils import load_trade_history
 
 
 class Trader:
@@ -21,10 +21,12 @@ class Trader:
             annual_products = set([t["product"] for t in annual_trade_data if "/" in t["product"]])
             product_annual_reports = {}
             for product in annual_products:
-                product_trade_data_buy = \
-                    [t for t in annual_trade_data if t["product"] == product and t["type"] == "Buy"]
-                product_trade_data_sell = \
-                    [t for t in annual_trade_data if t["product"] == product and t["type"] == "Sell"]
+                product_trade_data_buy = [
+                    t for t in annual_trade_data if t["product"] == product and t["type"] == "Buy"
+                ]
+                product_trade_data_sell = [
+                    t for t in annual_trade_data if t["product"] == product and t["type"] == "Sell"
+                ]
                 product_total_buy_amount = sum([t["amount"] for t in product_trade_data_buy])
                 product_total_buy_price_jpy = sum([t["total_price_jpy"] for t in product_trade_data_buy])
                 product_total_sell_amount = sum([t["amount"] for t in product_trade_data_sell])
@@ -67,10 +69,15 @@ class Trader:
                     year -= 1
                 assert remainder > 0, f"Error: Not enough {t["product"]} to sell for {t["id"]}"
                 t["sell_amount_distribution"] = sell_amount_distribution
-                sell_profit_jpy = sum([t["total_price_jpy"] - 
-                                    sell_amount_distribution[y] * 
-                                    self.annual_reports[y][t["product"]]["annual_average_price_jpy"] 
-                                    for y in sell_amount_distribution if sell_amount_distribution[y] > 0])
+                sell_profit_jpy = sum(
+                    [
+                        t["total_price_jpy"]
+                        - sell_amount_distribution[y]
+                        * self.annual_reports[y][t["product"]]["annual_average_price_jpy"]
+                        for y in sell_amount_distribution
+                        if sell_amount_distribution[y] > 0
+                    ]
+                )
                 t["sell_profit_jpy"] = sell_profit_jpy
                 self.annual_reports[t["year"]][t["product"]]["annual_sell_profit_jpy"] += sell_profit_jpy
             t["post_txn_wallet_status"] = self.wallet_status
@@ -78,8 +85,10 @@ class Trader:
     def print_annual_reports(self):
         for year in self.trade_years:
             print(f"{year} ANNUAL PROFIT REPORT")
-            print(f"  Total annual profit: "
-                  f"{sum([p["annual_sell_profit_jpy"] for p in self.annual_reports[year].values()]):.0f} JPY")
+            print(
+                f"  Total annual profit: "
+                f"{sum([p["annual_sell_profit_jpy"] for p in self.annual_reports[year].values()]):.0f} JPY"
+            )
             print("  Details:")
             for product_name, product in self.annual_reports[year].items():
                 if product["total_sell_amount"] > 0:

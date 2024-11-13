@@ -1,7 +1,7 @@
 import csv
 
-from tqdm import tqdm
 from dateutil import parser
+from tqdm import tqdm
 
 from custom_types import Transaction
 

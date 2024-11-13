@@ -1,4 +1,5 @@
 import sys
+
 from trader import Trader
 
 
