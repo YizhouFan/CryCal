@@ -35,7 +35,9 @@ class Trader:
                     "total_buy_amount": product_total_buy_amount,
                     "total_buy_price_jpy": product_total_buy_price_jpy,
                     "total_sell_amount": product_total_sell_amount,
-                    "annual_average_price_jpy": product_total_buy_price_jpy / product_total_buy_amount,
+                    "annual_average_price_jpy": product_total_buy_price_jpy / product_total_buy_amount
+                    if product_total_buy_amount
+                    else 0,
                     "eoy_remaining_amount": product_total_buy_amount
                     - product_total_sell_amount,  # this is broken right now
                     "annual_sell_profit_jpy": 0.0,
