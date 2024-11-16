@@ -7,7 +7,6 @@ def main(args):
     csv_path = args[1]
     trader = Trader(csv_path)
     trader.make_annual_reports()
-    trader.simulate_trades()
     trader.print_annual_reports()
 
 
