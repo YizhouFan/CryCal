@@ -26,3 +26,7 @@ To format
 ```
 ./format.sh
 ```
+To run unit tests
+```
+uv run pytest
+```
