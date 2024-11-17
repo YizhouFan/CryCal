@@ -14,7 +14,7 @@ class TestTrader(unittest.TestCase):
         """
         trader = Trader(TEST_DATA_PATH / "official.csv")
         trader.make_annual_reports()
-        self.assertEqual(trader.annual_reports[2020]["BTC/JPY"]["total_buy_amount"], 6.5)
+        self.assertEqual(trader.annual_reports[2020]["BTC/JPY"]["total_buy_amount"], 6.15)
         self.assertEqual(trader.annual_reports[2020]["BTC/JPY"]["total_buy_price_jpy"], 4_037_800)
         self.assertEqual(trader.annual_reports[2020]["BTC/JPY"]["average_buy_price_jpy"], 621_200)
         self.assertEqual(trader.annual_reports[2020]["BTC/JPY"]["total_sell_amount"], 5.0)

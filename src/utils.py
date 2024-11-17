@@ -34,7 +34,7 @@ def convert_trade_history(trade_history: list, default_fee_rate: float = 0.001):
     for row in tqdm(trade_history[1:]):
         ts_str = row[0]
         ts_datetime = parser.parse(ts_str)
-        total_price_jpy = abs(float(row[9].replace(",",  "")))
+        total_price_jpy = abs(float(row[9].replace(",", "")))
         fee_jpy = row[10]
         if fee_jpy:
             fee_jpy = float(fee_jpy.replace(",", ""))
