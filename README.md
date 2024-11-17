@@ -25,7 +25,7 @@ uv run src/calculator.py data/TradeHistory.csv
 ## Contributing
 To format
 ```
-./format.sh
+./format.sh fix
 ```
 To run unit tests
 ```
