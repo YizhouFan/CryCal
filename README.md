@@ -1,6 +1,8 @@
 # CryCal クリカリ
 Cryptocurrency Calculator
 
+![ci badge](https://github.com/YizhouFan/CryCal/actions/workflows/ci.yml/badge.svg)
+
 ## Disclaimer
 This repository is not intended to offer legal, financial, or tax advice. By using this software, you acknowledge that the calculations are based on the inputs provided and may not reflect the most current laws or regulations. The creators of this repository make no representations or warranties regarding the accuracy, completeness, or reliability of the results generated. Users are encouraged to consult with a qualified tax professional or legal advisor to ensure compliance with all applicable laws and regulations. The creators are not liable for any errors, omissions, or consequences arising from the use of this software. Use at your own risk.
 
