@@ -74,5 +74,43 @@ class Trader:
             for _, product in self.annual_reports[year].items():
                 for key, value in product.items():
                     report_tabulate[key] = report_tabulate.get(key, []) + [value]
-            print(tabulate(report_tabulate, headers="keys"))
+            headers = [
+                "name",
+                "buy\namount",
+                "buy\nprice",
+                "average\nbuy price",
+                "sell\namount",
+                "sell\nprice",
+                "average\nsell price",
+                "BoY\namount",
+                "BoY\nevaluation",
+                "EoY\namount",
+                "EoY\nevaluation",
+                "EoY average\nprice",
+                "total\ncost",
+                "total\nprofit",
+            ]
+            print(
+                tabulate(
+                    report_tabulate,
+                    headers,
+                    tablefmt="fancy_grid",
+                    floatfmt=(
+                        ".4f",
+                        ".4f",
+                        ".0f",
+                        ".4f",
+                        ".4f",
+                        ".0f",
+                        ".4f",
+                        ".4f",
+                        ".4f",
+                        ".4f",
+                        ".4f",
+                        ".4f",
+                        ".4f",
+                        ".4f",
+                    ),
+                )
+            )
             print("\n")
