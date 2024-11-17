@@ -14,6 +14,15 @@ class Trader:
         self.all_products = set([t["product"] for t in self.trade_data if "/" in t["product"]])  # all crypto/JPY pairs
         self.annual_reports = {y: {} for y in self.trade_years}
 
+    def get_boy_values(self, product_name, year):
+        while year > self.min_year:
+            if product_name in self.annual_reports[year - 1]:
+                return self.annual_reports[year - 1][product_name]["eoy_amount"], self.annual_reports[year - 1][
+                    product_name
+                ]["eoy_evaluation_jpy"]
+            year -= 1
+        return 0.0, 0.0
+
     def make_annual_reports(self):
         for year in self.trade_years:
             annual_trade_data = [t for t in self.trade_data if t["year"] == year]
@@ -28,26 +37,12 @@ class Trader:
                 total_sell_amount = sum([t["amount"] for t in trade_data_sell])
                 total_sell_price_jpy = sum([t["total_price_jpy"] for t in trade_data_sell])
                 average_sell_price_jpy = total_sell_price_jpy / total_sell_amount if total_sell_amount else 0.0
-                if year > self.min_year:
-                    boy_amount = (
-                        self.annual_reports[year - 1][product]["eoy_amount"]
-                        if product in self.annual_reports[year - 1]
-                        else 0.0
-                    )
-                    boy_evaluation_jpy = (
-                        self.annual_reports[year - 1][product]["eoy_evaluation_jpy"]
-                        if product in self.annual_reports[year - 1]
-                        else 0.0
-                    )
-                else:
-                    boy_amount = boy_evaluation_jpy = 0.0
+                boy_amount, boy_evaluation_jpy = self.get_boy_values(product, year)
                 eoy_amount = boy_amount + total_buy_amount - total_sell_amount
                 eoy_average_price_jpy = (boy_evaluation_jpy + total_buy_price_jpy) / (boy_amount + total_buy_amount)
                 eoy_evaluation_jpy = eoy_average_price_jpy * eoy_amount
                 total_cost_jpy = eoy_average_price_jpy * total_sell_amount
-                total_profit_jpy = (
-                    total_sell_price_jpy - total_cost_jpy if total_sell_amount else 0.0
-                )
+                total_profit_jpy = total_sell_price_jpy - total_cost_jpy if total_sell_amount else 0.0
                 annual_report: Product = {
                     "name": product,
                     "total_buy_amount": total_buy_amount,
