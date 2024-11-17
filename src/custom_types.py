@@ -31,4 +31,5 @@ class Product(TypedDict):
     eoy_amount: float
     eoy_evaluation_jpy: float
     eoy_average_price_jpy: float
+    total_cost_jpy: float
     total_profit_jpy: float

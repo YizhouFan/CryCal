@@ -1,5 +1,4 @@
 from tabulate import tabulate
-from tqdm import tqdm
 
 from custom_types import Product
 from utils import load_trade_history
@@ -45,8 +44,9 @@ class Trader:
                 eoy_amount = boy_amount + total_buy_amount - total_sell_amount
                 eoy_average_price_jpy = (boy_evaluation_jpy + total_buy_price_jpy) / (boy_amount + total_buy_amount)
                 eoy_evaluation_jpy = eoy_average_price_jpy * eoy_amount
+                total_cost_jpy = eoy_average_price_jpy * total_sell_amount
                 total_profit_jpy = (
-                    total_sell_price_jpy - eoy_average_price_jpy * total_sell_amount if total_sell_amount else 0.0
+                    total_sell_price_jpy - total_cost_jpy if total_sell_amount else 0.0
                 )
                 annual_report: Product = {
                     "name": product,
@@ -61,6 +61,7 @@ class Trader:
                     "eoy_amount": eoy_amount,
                     "eoy_evaluation_jpy": eoy_evaluation_jpy,
                     "eoy_average_price_jpy": eoy_average_price_jpy,
+                    "total_cost_jpy": total_cost_jpy,
                     "total_profit_jpy": total_profit_jpy,
                 }
                 product_annual_reports[product] = annual_report
@@ -75,7 +76,7 @@ class Trader:
             )
             print("Details per cryptocurrency/JPY pair:")
             report_tabulate = {}
-            for product_name, product in self.annual_reports[year].items():
+            for _, product in self.annual_reports[year].items():
                 for key, value in product.items():
                     report_tabulate[key] = report_tabulate.get(key, []) + [value]
             print(tabulate(report_tabulate, headers="keys"))
