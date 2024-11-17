@@ -28,7 +28,7 @@ class TestTrader(unittest.TestCase):
         self.assertEqual(trader.annual_reports[2020]["BTC/JPY"]["total_cost_jpy"], 3_106_000)
         self.assertEqual(trader.annual_reports[2020]["BTC/JPY"]["total_profit_jpy"], 2_189_000)
 
-    def test_init(self):
+    def test_simple(self):
         trader = Trader(TEST_DATA_PATH / "simple.csv")
         self.assertEqual(trader.num_trade_data, 4)
         self.assertEqual(trader.min_year, 2019)
@@ -40,3 +40,4 @@ class TestTrader(unittest.TestCase):
         self.assertAlmostEqual(trader.annual_reports[2024]["BTC/JPY"]["total_cost_jpy"], 2_539_272)
         self.assertAlmostEqual(trader.annual_reports[2024]["BTC/JPY"]["eoy_amount"], 0.0)
         self.assertAlmostEqual(trader.annual_reports[2024]["BTC/JPY"]["eoy_evaluation_jpy"], 0)
+        trader.print_annual_reports()
