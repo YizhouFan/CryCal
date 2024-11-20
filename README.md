@@ -1,5 +1,5 @@
 # CryCal - Supports the latest bitFlyer version!
-# クリカリ - 最新版ビットフライヤーを対応！
+# クリカル - 最新版ビットフライヤーを対応！
 Cryptocurrency Calculator 暗号資産のための電卓
 
 ![ci badge](https://github.com/YizhouFan/CryCal/actions/workflows/ci.yml/badge.svg)
